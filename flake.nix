@@ -119,22 +119,6 @@
           };
       in
       {
-        nixosConfigurations = {
-          "nixos" = nixpkgs.lib.nixosSystem {
-            inherit system;
-            specialArgs = { inherit inputs; };
-            modules = [
-              ./scripts/nix/configuration.nix
-              nixos-wsl.nixosModules.default
-              {
-                system.stateVersion = "25.05";
-                wsl.enable = true;
-                wsl.defaultUser = "nixos";
-              }
-            ];
-          };
-        };
-
         packages = rec {
           aletix-i386 = mkKernel "i386";
           aletix-x86_64 = mkKernel "x86_64";
@@ -144,6 +128,23 @@
           aletix-riscv64 = mkKernel "riscv64";
           aletix = aletix-x86_64;
           default = aletix;
+
+          # NixOS-WSL
+          nixosConfigurations = {
+            "nixos" = nixpkgs.lib.nixosSystem {
+              inherit system;
+              specialArgs = { inherit inputs; };
+              modules = [
+                ./scripts/nix/configuration.nix
+                nixos-wsl.nixosModules.default
+                {
+                  system.stateVersion = "25.05";
+                  wsl.enable = true;
+                  wsl.defaultUser = "nixos";
+                }
+              ];
+            };
+          };
         };
 
         devShells = rec {

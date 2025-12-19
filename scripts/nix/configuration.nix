@@ -14,6 +14,87 @@
   ];
 
   programs.nix-ld.enable = true;
+  environment.systemPackages = with pkgs; [
+    wget
+    git
+    direnv
+
+    # Customization for Zsh
+    fzf
+    chroma
+    starship
+  ];
+
+  environment.etc = {
+
+  };
+
+  users.users."nixos".shell = pkgs.zsh;
+
+  programs.zsh = {
+    autosuggestions = {
+      enable = true;
+      async = true;
+    };
+
+    enable = true;
+    enableBashCompletion = true;
+    enableCompletion = true;
+    enableGlobalCompInit = true;
+    enableLsColors = true;
+
+    histSize = 10000;
+    histFile = "$HOME/.zsh_history";
+
+    loginShellInit = ''
+      export ZSH_CUSTOM=/etc/zsh/custom
+    '';
+
+    ohMyZsh = {
+      enable = true;
+      custom = "/etc/zsh/custom";
+      cacheDir = "$HOME/.config/zsh/cache";
+      plugins = [
+        "aliases"
+        "branch"
+        "colorize"
+        "command-not-found"
+        "direnv"
+        "docker"
+        "gh"
+        "gitfast"
+        "pip"
+        "python"
+        "rust"
+        "zsh-interactive-cd"
+      ];
+    };
+
+    shellInit = ''
+      export ZSH_COLORIZE_TOOL=chroma
+
+      autoload -Uz compinit && compinit
+      eval "$(starship init zsh)"
+      eval "$(starship completions zsh)"
+    '';
+
+    shellAliases = {
+      update-system = "sudo nixos-rebuild switch --flake git+https://github.com/nauxi-xl/Aletix#nixos";
+      change-theme = "starship preset -o $HOME/.config/starship.toml";
+    };
+
+    syntaxHighlighting = {
+      enable = true;
+      highlighters = [
+        "main"
+        "brackets"
+        "pattern"
+        "regexp"
+        "cursor"
+        "line"
+      ];
+    };
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
