@@ -1,0 +1,4 @@
+try-import %workspace%/bazel/preset.bazelrc
+
+common --host_platform=@rules_nixpkgs_core//platforms:host
+build:debug --sandbox_debug --verbose_failures --subcommands

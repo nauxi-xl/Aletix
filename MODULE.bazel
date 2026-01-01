@@ -1,0 +1,75 @@
+# Nixpkgs rules
+bazel_dep(name = "rules_nixpkgs_core", version = "0.13.0")
+bazel_dep(name = "rules_nixpkgs_cc", version = "0.13.0")
+archive_override(
+    module_name = "rules_nixpkgs_cc",
+    strip_prefix = "rules_nixpkgs-0.13.0/toolchains/cc",
+    urls = ["https://github.com/tweag/rules_nixpkgs/releases/download/v0.13.0/rules_nixpkgs-0.13.0.tar.gz"],
+)
+
+nix_repo = use_extension("@rules_nixpkgs_core//extensions:repository.bzl", "nix_repo")
+nix_repo.file(
+    name = "nixpkgs",
+    file = "//:nixpkgs.nix",
+    file_deps = [
+        "//:flake.lock",
+    ],
+)
+use_repo(nix_repo, "nixpkgs")
+
+# rules_nixpkgs_cc dependencies
+# Will be removed in future
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "rules_cc", version = "0.2.16")
+
+#
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.2")
+bazel_dep(name = "platforms", version = "1.0.0")
+
+# .bazelrc presets
+bazel_dep(name = "bazelrc-preset.bzl", version = "1.8.0")
+
+# Hedron's Compile Commands Extractor for Bazel
+# https://github.com/hedronvision/bazel-compile-commands-extractor
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "abb61a688167623088f8768cc9264798df6a9d10",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+    # Replace the commit hash (above) with the latest (https://github.com/hedronvision/bazel-compile-commands-extractor/commits/main).
+    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
+)
+
+# External archives used for building
+# external_archives = use_extension("//bazel/extensions:archives.bzl", "external_archives", dev_dependency = True)
+
+# External repositories
+external_repos = use_extension("//bazel/extensions:repositories.bzl", "external_repos")
+use_repo(external_repos, "limine")
+
+# Nix packages
+nix_packages = use_extension("//bazel/extensions:packages.bzl", "nix_packages")
+
+# use_repo(nix_packages, "gnu-efi")
+use_repo(nix_packages, "coreutils")
+use_repo(nix_packages, "gnumake")
+use_repo(nix_packages, "libisoburn")
+use_repo(nix_packages, "qemu")
+
+# CC Toolchains
+cc_toolchains = use_extension("//bazel/extensions:packages.bzl", "nixpkgs_cc_toolchains")
+
+[
+    [
+        use_repo(cc_toolchains, "{}_config_cc".format(target)),
+        use_repo(cc_toolchains, "{}_config_cc_toolchains".format(target)),
+        use_repo(cc_toolchains, "{}_config_cc_info".format(target)),
+        register_toolchains("@{}_config_cc_toolchains//:all".format(target)),
+    ]
+    for target in [
+        "host",
+        "x86_64-w64-mingw32",
+        "x86_64-elf",
+        "aarch64-none-elf",
+    ]
+]
