@@ -13,7 +13,13 @@
   imports = [
   ];
 
-  programs.nix-ld.enable = true;
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      stdenv.cc.cc.lib
+      zlib
+    ];
+  };
   environment.systemPackages = with pkgs; [
     wget
     git
@@ -60,7 +66,6 @@
         "colorize"
         "command-not-found"
         "direnv"
-        "docker"
         "gh"
         "gitfast"
         "pip"

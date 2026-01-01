@@ -1,2 +1,5 @@
 .direnv/
 .token
+
+bazel-*
+compile_commands.json
